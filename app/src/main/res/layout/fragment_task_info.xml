@@ -14,12 +14,14 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
-        android:text="@string/hello_blank_fragment"
+        android:text="@string/taskInfoTit"
         android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-    <ImageView android:id="@+id/taskInfoImage"
+
+    <ImageView
+        android:id="@+id/taskInfoImage"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
@@ -29,16 +31,30 @@
         app:layout_constraintBottom_toTopOf="@+id/taskInfoDescription"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/taskInfoTitle"
-        app:srcCompat="@drawable/circle_drawable_green" />
-    <TextView android:id="@+id/taskInfoDescription"
+        app:layout_constraintTop_toBottomOf="@+id/taskInfoTitle" />
+
+    <TextView
+        android:id="@+id/taskInfoDescription"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="32dp"
-        android:text="TextView"
+        android:layout_marginBottom="104dp"
+        android:text="@string/taskInfoDes"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/taskInfoDate"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="@string/taskInfoDat"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/taskInfoDescription"
+        app:layout_constraintStart_toStartOf="@+id/taskInfoDescription"
+        app:layout_constraintTop_toBottomOf="@+id/taskInfoDescription"
+        app:layout_constraintVertical_bias="0.168" />
 </android.support.constraint.ConstraintLayout>

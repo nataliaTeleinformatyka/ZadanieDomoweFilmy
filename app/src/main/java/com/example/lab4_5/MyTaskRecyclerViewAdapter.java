@@ -1,14 +1,25 @@
 package com.example.lab4_5;
 
+import android.app.Activity;
+import android.content.res.Resources;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.content.FileProvider;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.lab4_5.TaskFragment.OnListFragmentInteractionListener;
 import com.example.lab4_5.tasks.TaskListContent;
@@ -30,80 +41,95 @@ public class MyTaskRecyclerViewAdapter extends RecyclerView.Adapter<MyTaskRecycl
         mValues = items;
         mListener = listener;
     }
-
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_task, parent, false);
         return new ViewHolder(view);
     }
-
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
-        //holder.mItem = mValues.get(position);
-        //holder.mIdView.setText(mValues.get(position).id);
-       // holder.mContentView.setText(mValues.get(position).title);
-
         Task task = mValues.get(position);
-        holder.mItem=task;
+        holder.mItem = task;
         holder.mContentView.setText(task.title);
         final String picPath = task.picPath;
-        Context context = holder.mView.getContext();
+        final Context context = holder.mView.getContext();
 
-        if(picPath != null && !picPath.isEmpty()){
-
-            if(picPath.contains("drawable")) {
+        if (picPath != null && !picPath.isEmpty()) {
+            if (picPath.contains("drawable")) {
                 Drawable taskDrawable;
-                        switch(picPath) {
-                            case "drawable 1" :
-                                taskDrawable =  context.getResources().getDrawable(R.drawable.circle_drawable_green);
-                                break;
-                            case "drawable 2" :
-                                taskDrawable = context.getResources().getDrawable(R.drawable.circle_drawable_orange);
-                                break;
-                            case "drawable 3" :
-                                taskDrawable = context.getResources().getDrawable(R.drawable.circle_drawable_red);
-                                break;
-                            default:
-                                taskDrawable = context.getResources().getDrawable(R.drawable.circle_drawable_green);
-                        }
-                        holder.mItemImageView.setImageDrawable(taskDrawable);
+                int id;
+                Resources resource = context.getResources();
+                switch (picPath) {
+                    case "drawable 1":
+                        //taskDrawable = context.getResources().getDrawable(R.drawable.botoks);
+                        id = R.drawable.botoks;
+                        break;
+                    case "drawable 2":
+                        //taskDrawable = context.getResources().getDrawable(R.drawable.kler);
+                        id = R.drawable.kler;
+                        break;
+                    case "drawable 3":
+                        //taskDrawable = context.getResources().getDrawable(R.drawable.kochajalborzuc);
+                        id = R.drawable.kochajalborzuc;
+                        break;
+                    case "drawable 4":
+                        //taskDrawable = context.getResources().getDrawable(R.drawable.listydom3);
+                        id = R.drawable.listydom3;
+                        break;
+                    case "drawable 5":
+                        // taskDrawable = context.getResources().getDrawable(R.drawable.samiswoi);
+                        id = R.drawable.samiswoi;
+                        break;
+                    case "drawable 6":
+                        //taskDrawable = context.getResources().getDrawable(R.drawable.upanabogawogrodku);
+                        id = R.drawable.upanabogawogrodku;
+                        break;
+                    default:
+                        //taskDrawable = context.getResources().getDrawable(R.drawable.botoks);
+                        id = R.drawable.upanabogawogrodku;
+                }
+                Bitmap bmp = BitmapFactory.decodeResource(resource, id);
+                int width = 200;
+                int height = 200;
+                Bitmap resizedbitmap = Bitmap.createScaledBitmap(bmp, width, height, true);
+                holder.mItemImageView.setImageBitmap(resizedbitmap);
+                //holder.mItemImageView.setImageDrawable(taskDrawable);
+
+            } else {
+
+                Bitmap cameraImage = PicUtils.decodePic(picPath, 200, 200);
+                Bitmap myBitmap = BitmapFactory.decodeFile(task.picPath);
+
+                holder.mItemImageView.setImageBitmap(cameraImage);
             }
-        } else {
-            //holder.mItemImageView.setImageDrawable(context.getResources().getDrawable(R.drawable.circle_drawable_green));
-
-            Bitmap cameraImage = PicUtils.decodePic(task.picPath,60,60);
-            holder.mItemImageView.setImageBitmap(cameraImage);
         }
-
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (null != mListener) {
-                    // Notify the active callbacks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentClickInteraction(holder.mItem,position);
+                    mListener.onListFragmentClickInteraction(holder.mItem, position);
                 }
             }
         });
-        holder.mView.setOnLongClickListener(new View.OnLongClickListener() {
+        holder.mDeleteImage.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onLongClick(View v) {
-                mListener.onListFragmentLongClickInteraction(position);
-                return false;
+            public void onClick(View v) {
+                if(mListener != null) {
+                    mListener.onDeleteClickInteraction(position);
+                }
             }
         });
     }
-
     @Override
     public int getItemCount() {
         return mValues.size();
     }
-
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
         public final TextView mContentView;
         public final ImageView mItemImageView;
+        public final ImageView mDeleteImage;
         public Task mItem;
 
         public ViewHolder(View view) {
@@ -111,11 +137,12 @@ public class MyTaskRecyclerViewAdapter extends RecyclerView.Adapter<MyTaskRecycl
             mView = view;
             mItemImageView= (ImageView)  view.findViewById(R.id.item_image);
             mContentView = (TextView) view.findViewById(R.id.content);
+            mDeleteImage = (ImageView) view.findViewById(R.id.deleteBasket);
         }
-
         @Override
         public String toString() {
             return super.toString() + " '" + mContentView.getText() + "'";
         }
     }
 }
+// oddanie kodu + obrona

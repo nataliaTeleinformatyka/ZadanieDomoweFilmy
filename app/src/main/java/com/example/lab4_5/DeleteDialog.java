@@ -18,7 +18,7 @@ import android.widget.TextView;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link DeleteDialog.OnFragmentInteractionListener} interface
+ * {@link DeleteDialog.OnDeleteDialogInteractionListener) interface
  * to handle interaction events.
  */
 public class DeleteDialog extends DialogFragment {

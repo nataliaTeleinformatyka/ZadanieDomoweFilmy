@@ -5,19 +5,25 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Environment;
 import android.os.Parcelable;
+import android.provider.MediaStore;
 import android.renderscript.Type;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.Spinner;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.lab4_5.tasks.TaskListContent;
@@ -34,56 +40,42 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+
+import static android.os.Environment.DIRECTORY_PICTURES;
 
 public class MainActivity extends AppCompatActivity implements
         TaskFragment.OnListFragmentInteractionListener,
-        DeleteDialog.OnDeleteDialogInteractionListener{
+        DeleteDialog.OnDeleteDialogInteractionListener {
 
     public static final String taskExtra = "taskExtra";
-    private int currentItemPosition = -1;
-    private TaskListContent.Task currentTask;
     private final String CURRENT_TASK_KEY = "CurrentTask";
-    private final String CHECKED_ID = "ckeckedId";
     private final String TASKS_SHARED_PREFS = "TasksSharedPrefs";
-    private final String TASKS_TEXT_FILE = "tasks.txt";
-    private final String TASKS_JSON_FILE = "tasks.json";
     private final String NUM_TASKS = "NumOfTasks";
     private final String TASK = "task_";
     private final String DETAIL = "desc_";
     private final String PIC = "pic_";
     private final String ID = "id_";
     private final String DATE = "date_";
+    private String mCurrentPhotoPath;
+    private int currentItemPosition = -1;
+    private static final int ADD_CAMERA_ACTIVITY_REQUEST_CODE = 3;
+    private static final int ADD_ACTIVITY_REQUEST_CODE = 2;
+    private static final int REQUEST_CAPTURE_IMAGE = 100;
+    private TaskListContent.Task currentTask;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if(savedInstanceState != null) {
+        if (savedInstanceState != null) {
             currentTask = savedInstanceState.getParcelable(CURRENT_TASK_KEY);
         }
-
-       // SharedPreferences tasks = getSharedPreferences(TASKS_SHARED_PREFS,MODE_PRIVATE);
-        //int checkedRadioButtonId= tasks.getInt(CHECKED_ID,R.id.prefsRadioButton);
-        //RadioButton checkedButtonStart = findViewById(R.id.prefsRadioButton) ;
-        //checkedButtonStart.setChecked(true);
-       // RadioGroup saveRadioGroup = findViewById(R.id.saveRadioGroup);
-        //saveRadioGroup.check(checkedRadioButtonId);
-
-       // switch ( checkedRadioButtonId) {
-        //    case R.id.prefsRadioButton:
-            //    restoreTasksFromSharedPreferences();
-          //      break;
-           /* case R.id.textRadioButton:
-                restoreTasksFromFile();
-                break;*/
-            /*case R.id.jsonRadioButton:
-                restoreFromJson();
-                break;*/
-         //   default:
-          //      restoreTasksFromSharedPreferences();
-       // }
+        SharedPreferences tasks = getSharedPreferences(TASKS_SHARED_PREFS, MODE_PRIVATE);
+        restoreTasksFromSharedPreferences();
         FloatingActionButton addNewTask = findViewById(R.id.add_task);
         addNewTask.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -91,128 +83,149 @@ public class MainActivity extends AppCompatActivity implements
                 startThirdActivity();
             }
         });
+
+        FloatingActionButton addNewTaskCamera = findViewById(R.id.add_task_camera);
+        addNewTaskCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startFourthActivity();
+            }
+        });
     }
 
     @Override
-    protected  void onResume() {
+    protected void onResume() {
         super.onResume();
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            if(currentTask != null)
+        //SharedPreferences tasks = getSharedPreferences(TASKS_SHARED_PREFS, MODE_PRIVATE);
+        //restoreTasksFromSharedPreferences();
+        ((TaskFragment) getSupportFragmentManager().findFragmentById(R.id.taskFragment)).notifyDataChange();
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            if (currentTask != null)
                 displayTaskInFragment(currentTask);
         }
     }
-
     @Override
     protected void onDestroy() {
-        //RadioGroup saveRadioGroup = findViewById(R.id.saveRadioGroup);
-       // int checkedRadioButtonId = saveRadioGroup.getCheckedRadioButtonId();
-        SharedPreferences tasks = getSharedPreferences(TASKS_SHARED_PREFS,MODE_PRIVATE);
+        SharedPreferences tasks = getSharedPreferences(TASKS_SHARED_PREFS, MODE_PRIVATE);
         SharedPreferences.Editor editor = tasks.edit();
-        //editor.putInt(CHECKED_ID,checkedRadioButtonId);
         editor.apply();
-        //switch (checkedRadioButtonId) {
-         //   case R.id.prefsRadioButton :
-          //      saveTasksToSharedPreferences();
-          //      break;
-           /* case R.id.textRadioButton :
-                saveTasksToFile();
-                break;*/
-        /*    case R.id.jsonRadioButton :
-                saveTasksToJson();
-                break;*/
-          //  default:
-          //      saveTasksToSharedPreferences();
-       // }
+        saveTasksToSharedPreferences();
         super.onDestroy();
     }
-   /* public void addClick(View view) {
-        EditText taskTitleEditTxt = findViewById(R.id.taskTitle);
-        EditText taskDescriptionEditTxt = findViewById(R.id.taskDescription);
-        Spinner drawableSpinner = findViewById(R.id.drawableSpinner);
-        String taskTitle = taskTitleEditTxt.getText().toString();
-        String taskDescription = taskDescriptionEditTxt.getText().toString();
-        String selectedImage = drawableSpinner.getSelectedItem().toString();
-        Toast.makeText(this,/*getString(R.string.item_selected_msr)*//*"jestem tutaj - ADDCLICK",Toast.LENGTH_SHORT).show();
-
-        if(taskTitle.isEmpty() && taskDescription.isEmpty()) {
-            TaskListContent.addItem(new TaskListContent.Task("Task."+TaskListContent.ITEMS.size()+1,
-                    getString(R.string.default_title),
-                    getString(R.string.default_description),
-                    selectedImage));
-        } else {
-            if(taskTitle.isEmpty())
-                taskTitle = getString(R.string.default_title);
-            if(taskDescription.isEmpty())
-                taskDescription = getString(R.string.default_description);
-            TaskListContent.addItem(new TaskListContent.Task("Task."+TaskListContent.ITEMS.size()+1,
-                    taskTitle,
-                    taskDescription,
-                    selectedImage));
-            Toast.makeText(this,/*getString(R.string.item_selected_msr)*//*"jestem tutaj - add click dodaje nowy element listy ",Toast.LENGTH_SHORT).show();
-
-        }
-
-        ((TaskFragment) getSupportFragmentManager().findFragmentById(R.id.taskFragment)).notifyDataChange();
-        taskTitleEditTxt.setText("");
-        taskDescriptionEditTxt.setText("");
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(view.getWindowToken(),0);
-    }
-*/
     @Override
     public void onListFragmentClickInteraction(Task task, int position) {
         currentTask = task;
-        Toast.makeText(this,/*getString(R.string.item_selected_msr)*/"jestem tutaj - onListFragmentClickINteraction",Toast.LENGTH_SHORT).show();
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             displayTaskInFragment(task);
-            Toast.makeText(this,"JESTEM W DISPLAY TASK IN FRAGMENT :D ",Toast.LENGTH_SHORT).show();
-
         } else {
             startSecondActivity(task, position);
         }
     }
-
-    private void showDeleteDialog() {
-        DeleteDialog.newInstance().show(getSupportFragmentManager(),getString(R.string.delete_dialog_tag));
-    }
-
-    @Override
-    public void onListFragmentLongClickInteraction(int position) {
-        Toast.makeText(this,getString(R.string.long_click_msg)+position,Toast.LENGTH_SHORT).show();
-        showDeleteDialog();
-        currentItemPosition = position;
-
-    }
-    private void startSecondActivity(TaskListContent.Task task,int position) {
-        Intent intent = new Intent(this,TaskInfoActivity.class);
+    private void startSecondActivity(TaskListContent.Task task, int position) {
+        Intent intent = new Intent(this, TaskInfoActivity.class);
         intent.putExtra(taskExtra, task);
-
         startActivity(intent);
     }
     private void startThirdActivity() {
-        Intent intent = new Intent(this, AddTaskActivity.class);
-        startActivity(intent);
+        Intent intentAdd = new Intent(this, AddTaskActivity.class);
+        int id = 2;
+        intentAdd.putExtra("id", id);
+        startActivityForResult(intentAdd, ADD_ACTIVITY_REQUEST_CODE);
+    }
+    private void startFourthActivity() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+           File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+            }
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(this, getString(R.string.myFileprovider), photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, REQUEST_CAPTURE_IMAGE);
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK && requestCode == REQUEST_CAPTURE_IMAGE) {
+            int id = ADD_CAMERA_ACTIVITY_REQUEST_CODE;
+
+            //  ImageView image = findViewById(R.id.imageView);
+            // Bitmap myBitmap = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
+
+            // image.setImageBitmap(myBitmap);
+
+
+            Intent cameraAddIntent = new Intent(this, AddTaskActivity.class);
+
+            cameraAddIntent.putExtra("id", id);
+
+            Toast.makeText(this, "on ACTIVITIY PHOTO URI :::: " + mCurrentPhotoPath, Toast.LENGTH_SHORT).show();
+
+
+            cameraAddIntent.putExtra("mCurrentPhotoPath", mCurrentPhotoPath);
+
+            startActivityForResult(cameraAddIntent, ADD_CAMERA_ACTIVITY_REQUEST_CODE);
+        }
+    }
+    private File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        if (!storageDir.exists()) {
+            if (!storageDir.mkdirs()) {
+                Log.d("Camera", " failed to create directory");
+                return null;
+            }
+        }
+        File image = new File(storageDir.getPath() + File.separator + "IMG_" + timeStamp + ".jpg");
+        mCurrentPhotoPath = image.getAbsolutePath();
+        return image;
     }
     private void displayTaskInFragment(TaskListContent.Task task) {
         TaskInfoFragment taskInfoFragment = ((TaskInfoFragment) getSupportFragmentManager().findFragmentById(R.id.displayFragment));
-        if(taskInfoFragment !=null) {
+        if (taskInfoFragment != null) {
             taskInfoFragment.displayTask(task);
         }
     }
-
+    @Override
+    public void onDeleteClickInteraction(int position) {
+        showDeleteDialog();
+        currentItemPosition = position;
+    }
+    private void showDeleteDialog() {
+        DeleteDialog.newInstance().show(getSupportFragmentManager(), getString(R.string.delete_dialog_tag));
+    }
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
-        if(currentItemPosition != -1 && currentItemPosition < TaskListContent.ITEMS.size()) {
+        if (currentItemPosition != -1 && currentItemPosition < TaskListContent.ITEMS.size()) {
+            SharedPreferences tasks = getSharedPreferences(TASKS_SHARED_PREFS, MODE_PRIVATE);
+            SharedPreferences.Editor editor = tasks.edit();
+            String path = tasks.getString(PIC + currentItemPosition, "88");
+
+            editor.remove(TASK + currentItemPosition);
+            editor.remove(DETAIL + currentItemPosition);
+            editor.remove(DATE + currentItemPosition);
+            editor.remove(PIC + currentItemPosition);
+            editor.remove(ID + currentItemPosition);
+            editor.apply();
+            File file = new File(path);
+            boolean test = file.delete();
+            Toast.makeText(this, "usunieto " + test + " o adresie " + path + " numer " + currentItemPosition, Toast.LENGTH_LONG).show();
+
             TaskListContent.removeItem(currentItemPosition);
+            //saveTasksToSharedPreferencesAfterDelete();
             ((TaskFragment) getSupportFragmentManager().findFragmentById(R.id.taskFragment)).notifyDataChange();
+
         }
     }
-
     @Override
     public void onDialogNegativeClick(DialogFragment dialog) {
-        View v =findViewById(R.id.addButton);
-        if(v!=null) {
-            Snackbar.make(v,getString(R.string.delete_cancel_msg),Snackbar.LENGTH_LONG).setAction(getString(R.string.retry_msg), new View.OnClickListener(){
+        View v = findViewById(R.id.addButton);
+        if (v != null) {
+            Snackbar.make(v, getString(R.string.delete_cancel_msg), Snackbar.LENGTH_LONG).setAction(getString(R.string.retry_msg), new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     showDeleteDialog();
@@ -222,131 +235,72 @@ public class MainActivity extends AppCompatActivity implements
     }
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        if(currentTask != null)
-            outState.putParcelable(CURRENT_TASK_KEY,currentTask);
+        if (currentTask != null)
+            outState.putParcelable(CURRENT_TASK_KEY, currentTask);
         super.onSaveInstanceState(outState);
     }
-    private void saveTasksToSharedPreferences(){
-        SharedPreferences tasks = getSharedPreferences(TASKS_SHARED_PREFS,MODE_PRIVATE);
+    private void saveTasksToSharedPreferences() {
+        SharedPreferences tasks = getSharedPreferences(TASKS_SHARED_PREFS, MODE_PRIVATE);
         SharedPreferences.Editor editor = tasks.edit();
-
         editor.clear();
-
-        editor.putInt(NUM_TASKS,TaskListContent.ITEMS.size());
-        for(int i=0;i<TaskListContent.ITEMS.size();i++) {
+        editor.putInt(NUM_TASKS, TaskListContent.ITEMS.size());
+        for (int i = 0; i < TaskListContent.ITEMS.size(); i++) {
             TaskListContent.Task task = TaskListContent.ITEMS.get(i);
-            editor.putString(TASK+i,task.title);
-            editor.putString(DETAIL+i,task.details);
-            editor.putString(DATE+i,task.date);
-            editor.putString(PIC+i,task.picPath);
-            editor.putString(ID+i,task.id);
+
+            editor.putString(TASK + i, task.title);
+            editor.putString(DETAIL + i, task.details);
+            editor.putString(DATE + i, task.date);
+            editor.putString(PIC + i, task.picPath);
+            editor.putString(ID + i, task.id);
         }
         editor.apply();
     }
-    private void restoreTasksFromSharedPreferences(){
-        SharedPreferences tasks = getSharedPreferences(TASKS_SHARED_PREFS,MODE_PRIVATE);
-        int numOfTasks = tasks.getInt(NUM_TASKS,0);
-        if(numOfTasks !=0) {
+    private void saveTasksToSharedPreferencesAfterDelete() {
+        SharedPreferences tasks = getSharedPreferences(TASKS_SHARED_PREFS, MODE_PRIVATE);
+        SharedPreferences.Editor editor = tasks.edit();
+        editor.clear();
+        editor.putInt(NUM_TASKS, TaskListContent.ITEMS.size());
+        Toast.makeText(this, "pozycja " + currentItemPosition + " wszystkich jest  " + tasks.getInt(NUM_TASKS,0), Toast.LENGTH_SHORT).show();
+
+        //for(int j=currentItemPosition; j < tasks.getInt(NUM_TASKS,0); j++) {
+            for (int i = currentItemPosition+1; i < TaskListContent.ITEMS.size(); i++) {
+                TaskListContent.Task task = TaskListContent.ITEMS.get(i);
+                Toast.makeText(this, "pozycja w forze" + currentItemPosition + " wszystkich jest  " + TaskListContent.ITEMS.get(i), Toast.LENGTH_SHORT).show();
+
+                String title = tasks.getString(TASK + i, "1000");
+                String detail = tasks.getString(DETAIL + i, "1000");
+                String date = tasks.getString(DATE + i, "1000");
+                String picPath = tasks.getString(PIC + i, "1000");
+                String id = tasks.getString(ID + i, "1000");
+
+                Toast.makeText(this, "tytul " + title + " o adresie " + picPath + " id " + id + "date " + date, Toast.LENGTH_LONG).show();
+
+
+                /*editor.putString(TASK + i, title);
+                    editor.putString(DETAIL + i, detail);
+                    editor.putString(DATE + i, date);
+                    editor.putString(PIC + i, picPath);
+                    editor.putString(ID + i, id);*/
+            }
+            editor.apply();
+
+    }
+    private void restoreTasksFromSharedPreferences() {
+        SharedPreferences tasks = getSharedPreferences(TASKS_SHARED_PREFS, MODE_PRIVATE);
+        int numOfTasks = tasks.getInt(NUM_TASKS, 0);
+        if (numOfTasks != 0) {
             TaskListContent.clearList();
 
-            for(int i=0;i<numOfTasks;i++){
-                String title = tasks.getString(TASK +i,"0");
-                String detail = tasks.getString(DETAIL + i,"0");
-                String date = tasks.getString(DATE+i,"0");
-                String picPath = tasks.getString(PIC+i,"0");
-                String id = tasks.getString(ID+i,"0");
-                TaskListContent.addItem(new TaskListContent.Task(id,title,detail,date,picPath));
+            for (int i = 0; i < numOfTasks; i++) {
+                String title = tasks.getString(TASK + i, "1000");
+                if (title.equals("1000")) {
+                    String detail = tasks.getString(DETAIL + i, "1000");
+                    String date = tasks.getString(DATE + i, "1000");
+                    String picPath = tasks.getString(PIC + i, "1000");
+                    String id = tasks.getString(ID + i, "1000");
+                    TaskListContent.addItem(new TaskListContent.Task(id, title, detail, date, picPath));
+                }
             }
         }
     }
-   /* private void saveTasksToFile(){
-        try(
-                FileOutputStream fileOutputStream = openFileOutput(TASKS_TEXT_FILE,MODE_PRIVATE)) {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(fileOutputStream.getFD()));
-            String delim =";";
-            for(int i=0;i<TaskListContent.ITEMS.size();i++) {
-                TaskListContent.Task task = TaskListContent.ITEMS.get(i);
-                String line=task.id + delim + task.title + delim + task.details.replace("\n","#n#") + delim + task.picPath;
-                writer.write(line);
-                writer.newLine();
-            }
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    private void restoreTasksFromFile() {
-        try {
-            FileInputStream fileInputStream = openFileInput(TASKS_TEXT_FILE);
-            BufferedReader reader = new BufferedReader(new FileReader(fileInputStream.getFD()));
-            String line;
-            String delim = ";";
-            TaskListContent.clearList();
-            while((line = reader.readLine()) != null ) {
-                String [] lineDetails = line.split(delim);
-                String id,title,detail, picPath;
-                id = lineDetails[0];
-                title = lineDetails[1];
-                detail = lineDetails[2];
-                try {
-                    picPath = lineDetails[3];
-                } catch (ArrayIndexOutOfBoundsException ex) {
-                    picPath= "";
-                }
-                TaskListContent.addItem(new TaskListContent.Task(id,title,detail.replace("#n#","\n"),picPath));
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }*/
-   /* private void saveTasksToJson() {
-        Gson gson = new Gson();
-        String listJson = gson.toJson(TaskListContent.ITEMS);
-        FileOutputStream outputStream;
-        try {
-            outputStream = openFileOutput(TASKS_JSON_FILE,MODE_PRIVATE);
-            FileWriter writer = new FileWriter(outputStream.getFD());
-            writer.write(listJson);
-            writer.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }*/
-   /* public void restoreFromJson(){
-        FileInputStream inputStream;
-        int DEFAULT_BUFFER_SIZE = 10000;
-        Gson gson = new Gson();
-        String readJson;
-        try {
-            inputStream = openFileInput(TASKS_JSON_FILE);
-            FileReader reader = new FileReader(inputStream.getFD());
-            char [] buf = new char[DEFAULT_BUFFER_SIZE];
-            int n;
-            StringBuilder builder = new StringBuilder();
-            while((n = reader.read(buf)) >=0 ) {
-                String tmp = String.valueOf(buf);
-                String substring= (n<DEFAULT_BUFFER_SIZE) ? tmp.substring(0,n) :tmp;
-                builder.append(substring);
-            }
-            reader.close();
-            readJson = builder.toString();
-            Type collectionType = (Type) new TypeToken<List<Task>>() {
-            }.getType();
-            List<Task> o = gson.fromJson(readJson, (java.lang.reflect.Type) collectionType);
-            if(o != null) {
-                TaskListContent.clearList();
-                for(TaskListContent.Task task :o) {
-                    TaskListContent.addItem(task);
-                }
-            }
-        }catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch(IOException e) {
-            e.printStackTrace();
-        }
-    }*/
 }

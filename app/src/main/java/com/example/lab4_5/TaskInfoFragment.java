@@ -31,28 +31,15 @@ import java.util.Date;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class TaskInfoFragment extends Fragment implements View.OnClickListener {
+public class TaskInfoFragment extends Fragment  {
     public static final int REQUEST_IMAGE_CAPTURE = 0;
     private String mCurrentPhotoPath;
     private TaskListContent.Task mDisplayedTask;
 
-    public TaskInfoFragment() {
-        // Required empty public constructor
-    }
-
-    private File createImageFile() throws IOException {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = mDisplayedTask.title + timeStamp + "_";
-        File storageDir = getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(imageFileName, ".jpg", storageDir);
-        mCurrentPhotoPath = image.getAbsolutePath();
-        return image;
-    }
+    public TaskInfoFragment() {}
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_task_info, container, false);
     }
 
@@ -62,10 +49,13 @@ public class TaskInfoFragment extends Fragment implements View.OnClickListener {
         (activity.findViewById(R.id.displayFragment)).setVisibility(View.VISIBLE);
         TextView taskInfoTitle = activity.findViewById(R.id.taskInfoTitle);
         TextView taskInfoDescription = activity.findViewById(R.id.taskInfoDescription);
+        TextView taskInfoDate = activity.findViewById(R.id.taskInfoDate);
         final ImageView taskInfoImage = activity.findViewById(R.id.taskInfoImage);
 
         taskInfoTitle.setText(task.title);
         taskInfoDescription.setText(task.details);
+        taskInfoDate.setText(task.date);
+
         if (task.picPath != null && !task.picPath.isEmpty()) {
             if(task.picPath.contains("drawable")) {
             Drawable taskDrawable;
@@ -89,7 +79,7 @@ public class TaskInfoFragment extends Fragment implements View.OnClickListener {
                     taskDrawable = activity.getResources().getDrawable(R.drawable.upanabogawogrodku);
                     break;
                 default:
-                    taskDrawable = activity.getResources().getDrawable(R.drawable.circle_drawable_green);
+                    taskDrawable = activity.getResources().getDrawable(R.drawable.botoks);
             }
             taskInfoImage.setImageDrawable(taskDrawable);
         } else {
@@ -105,19 +95,15 @@ public class TaskInfoFragment extends Fragment implements View.OnClickListener {
             }, 200);
         }
     }else {
-            taskInfoImage.setImageDrawable(activity.getResources().getDrawable(R.drawable.circle_drawable_green));
+            taskInfoImage.setImageDrawable(activity.getResources().getDrawable(R.drawable.samiswoi));
         }
         mDisplayedTask = task;
     }
-
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         FragmentActivity activity = getActivity();
-
         activity.findViewById(R.id.displayFragment).setVisibility(View.INVISIBLE);
-        activity.findViewById(R.id.taskInfoImage).setOnClickListener(this);
-
         Intent intent = getActivity().getIntent();
         if (intent != null) {
             TaskListContent.Task receivedTask = intent.getParcelableExtra(MainActivity.taskExtra);
@@ -126,7 +112,6 @@ public class TaskInfoFragment extends Fragment implements View.OnClickListener {
             }
         }
     }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
@@ -143,29 +128,7 @@ public class TaskInfoFragment extends Fragment implements View.OnClickListener {
                 }
                 if(holdingActivity instanceof MainActivity) {
                     ((TaskFragment) holdingActivity.getSupportFragmentManager().findFragmentById(R.id.taskFragment)).notifyDataChange();
-                } else {
-                    if(holdingActivity instanceof TaskInfoActivity) {
-                        ((TaskInfoActivity) holdingActivity).setImgChanged(true);
-                    }
                 }
-
-            }
-        }
-    }
-
-    @Override
-    public void onClick(View v) {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-            }
-            if (photoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(getActivity(), getString(R.string.myFileprovider), photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
             }
         }
     }
