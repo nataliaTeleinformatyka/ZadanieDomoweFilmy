@@ -67,6 +67,9 @@ public class TaskInfoFragment extends Fragment  {
                 case "drawable 6":
                     taskDrawable = activity.getResources().getDrawable(R.drawable.upanabogawogrodku);
                     break;
+                case "drawable 7":
+                    taskDrawable = activity.getResources().getDrawable(R.drawable.kapitanMarvel);
+                    break;
                 default:
                     taskDrawable = activity.getResources().getDrawable(R.drawable.botoks);
             }
@@ -98,7 +101,6 @@ public class TaskInfoFragment extends Fragment  {
             TaskListContent.Task receivedTask = intent.getParcelableExtra(MainActivity.taskExtra);
             if (receivedTask != null) {
                 displayTask(receivedTask);
-
             }
         }
     }

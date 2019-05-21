@@ -41,7 +41,7 @@ public class AddTaskActivity extends AppCompatActivity {
     }
     protected void randomImage() {
         Random rand = new Random();
-        int number = rand.nextInt(6) + 1;
+        int number = rand.nextInt(7) + 1;
         selectedImage = "drawable " + number;
     }
     private void saveTasksToSharedPreferences() {
