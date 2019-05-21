@@ -1,19 +1,14 @@
 package com.example.lab4_5;
 
-
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
-import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.FileProvider;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,12 +16,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.lab4_5.tasks.TaskListContent;
-
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 
 /**
  * A simple {@link Fragment} subclass.
@@ -109,6 +98,7 @@ public class TaskInfoFragment extends Fragment  {
             TaskListContent.Task receivedTask = intent.getParcelableExtra(MainActivity.taskExtra);
             if (receivedTask != null) {
                 displayTask(receivedTask);
+
             }
         }
     }

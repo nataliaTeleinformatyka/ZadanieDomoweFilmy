@@ -1,17 +1,11 @@
 package com.example.lab4_5;
 
-import android.arch.lifecycle.SingleGeneratedAdapterObserver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
-import android.os.Parcelable;
 import android.provider.MediaStore;
-import android.renderscript.Type;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
@@ -20,31 +14,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
-
 import com.example.lab4_5.tasks.TaskListContent;
 import com.example.lab4_5.tasks.TaskListContent.Task;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
-
-import static android.os.Environment.DIRECTORY_PICTURES;
 
 public class MainActivity extends AppCompatActivity implements
         TaskFragment.OnListFragmentInteractionListener,
@@ -74,7 +49,6 @@ public class MainActivity extends AppCompatActivity implements
         if (savedInstanceState != null) {
             currentTask = savedInstanceState.getParcelable(CURRENT_TASK_KEY);
         }
-        SharedPreferences tasks = getSharedPreferences(TASKS_SHARED_PREFS, MODE_PRIVATE);
         restoreTasksFromSharedPreferences();
         FloatingActionButton addNewTask = findViewById(R.id.add_task);
         addNewTask.setOnClickListener(new View.OnClickListener() {
@@ -96,8 +70,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        //SharedPreferences tasks = getSharedPreferences(TASKS_SHARED_PREFS, MODE_PRIVATE);
-        //restoreTasksFromSharedPreferences();
+        restoreTasksFromSharedPreferences();
         ((TaskFragment) getSupportFragmentManager().findFragmentById(R.id.taskFragment)).notifyDataChange();
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             if (currentTask != null)
@@ -152,22 +125,9 @@ public class MainActivity extends AppCompatActivity implements
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK && requestCode == REQUEST_CAPTURE_IMAGE) {
             int id = ADD_CAMERA_ACTIVITY_REQUEST_CODE;
-
-            //  ImageView image = findViewById(R.id.imageView);
-            // Bitmap myBitmap = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
-
-            // image.setImageBitmap(myBitmap);
-
-
             Intent cameraAddIntent = new Intent(this, AddTaskActivity.class);
-
             cameraAddIntent.putExtra("id", id);
-
-            Toast.makeText(this, "on ACTIVITIY PHOTO URI :::: " + mCurrentPhotoPath, Toast.LENGTH_SHORT).show();
-
-
             cameraAddIntent.putExtra("mCurrentPhotoPath", mCurrentPhotoPath);
-
             startActivityForResult(cameraAddIntent, ADD_CAMERA_ACTIVITY_REQUEST_CODE);
         }
     }
@@ -194,6 +154,7 @@ public class MainActivity extends AppCompatActivity implements
     public void onDeleteClickInteraction(int position) {
         showDeleteDialog();
         currentItemPosition = position;
+
     }
     private void showDeleteDialog() {
         DeleteDialog.newInstance().show(getSupportFragmentManager(), getString(R.string.delete_dialog_tag));
@@ -212,13 +173,10 @@ public class MainActivity extends AppCompatActivity implements
             editor.remove(ID + currentItemPosition);
             editor.apply();
             File file = new File(path);
-            boolean test = file.delete();
-            Toast.makeText(this, "usunieto " + test + " o adresie " + path + " numer " + currentItemPosition, Toast.LENGTH_LONG).show();
+            file.delete();
 
             TaskListContent.removeItem(currentItemPosition);
-            //saveTasksToSharedPreferencesAfterDelete();
             ((TaskFragment) getSupportFragmentManager().findFragmentById(R.id.taskFragment)).notifyDataChange();
-
         }
     }
     @Override
@@ -246,7 +204,6 @@ public class MainActivity extends AppCompatActivity implements
         editor.putInt(NUM_TASKS, TaskListContent.ITEMS.size());
         for (int i = 0; i < TaskListContent.ITEMS.size(); i++) {
             TaskListContent.Task task = TaskListContent.ITEMS.get(i);
-
             editor.putString(TASK + i, task.title);
             editor.putString(DETAIL + i, task.details);
             editor.putString(DATE + i, task.date);
@@ -254,36 +211,6 @@ public class MainActivity extends AppCompatActivity implements
             editor.putString(ID + i, task.id);
         }
         editor.apply();
-    }
-    private void saveTasksToSharedPreferencesAfterDelete() {
-        SharedPreferences tasks = getSharedPreferences(TASKS_SHARED_PREFS, MODE_PRIVATE);
-        SharedPreferences.Editor editor = tasks.edit();
-        editor.clear();
-        editor.putInt(NUM_TASKS, TaskListContent.ITEMS.size());
-        Toast.makeText(this, "pozycja " + currentItemPosition + " wszystkich jest  " + tasks.getInt(NUM_TASKS,0), Toast.LENGTH_SHORT).show();
-
-        //for(int j=currentItemPosition; j < tasks.getInt(NUM_TASKS,0); j++) {
-            for (int i = currentItemPosition+1; i < TaskListContent.ITEMS.size(); i++) {
-                TaskListContent.Task task = TaskListContent.ITEMS.get(i);
-                Toast.makeText(this, "pozycja w forze" + currentItemPosition + " wszystkich jest  " + TaskListContent.ITEMS.get(i), Toast.LENGTH_SHORT).show();
-
-                String title = tasks.getString(TASK + i, "1000");
-                String detail = tasks.getString(DETAIL + i, "1000");
-                String date = tasks.getString(DATE + i, "1000");
-                String picPath = tasks.getString(PIC + i, "1000");
-                String id = tasks.getString(ID + i, "1000");
-
-                Toast.makeText(this, "tytul " + title + " o adresie " + picPath + " id " + id + "date " + date, Toast.LENGTH_LONG).show();
-
-
-                /*editor.putString(TASK + i, title);
-                    editor.putString(DETAIL + i, detail);
-                    editor.putString(DATE + i, date);
-                    editor.putString(PIC + i, picPath);
-                    editor.putString(ID + i, id);*/
-            }
-            editor.apply();
-
     }
     private void restoreTasksFromSharedPreferences() {
         SharedPreferences tasks = getSharedPreferences(TASKS_SHARED_PREFS, MODE_PRIVATE);
@@ -293,7 +220,7 @@ public class MainActivity extends AppCompatActivity implements
 
             for (int i = 0; i < numOfTasks; i++) {
                 String title = tasks.getString(TASK + i, "1000");
-                if (title.equals("1000")) {
+                if (title != "1000") {
                     String detail = tasks.getString(DETAIL + i, "1000");
                     String date = tasks.getString(DATE + i, "1000");
                     String picPath = tasks.getString(PIC + i, "1000");

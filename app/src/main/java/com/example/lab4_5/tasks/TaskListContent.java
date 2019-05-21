@@ -1,15 +1,12 @@
 package com.example.lab4_5.tasks;
 
-import android.content.SharedPreferences;
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Helper class for providing sample content for user interfaces created by

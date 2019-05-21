@@ -16,9 +16,9 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="taskInfoTit">Tytuł</string>
     <string name="item_selected_msr">item_selected_msr</string>
-    <string name="delete_question">Delete Question</string>
-    <string name="dialog_confirm">Potwierdz</string>
-    <string name="dialog_cancel">Anuluj</string>
+    <string name="delete_question">Are you sure you want to delete?</string>
+    <string name="dialog_confirm">Yes</string>
+    <string name="dialog_cancel">Cancel</string>
     <string name="delete_dialog_tag">delete dialog tag</string>
     <string name="long_click_msg">long_click_msg</string>
     <string name="delete_cancel_msg">delete_cancel_msg</string>

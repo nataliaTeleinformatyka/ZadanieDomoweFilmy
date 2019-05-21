@@ -1,28 +1,17 @@
 package com.example.lab4_5;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
-import android.provider.MediaStore;
-import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.lab4_5.tasks.TaskListContent;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Random;
 
-import static com.example.lab4_5.TaskInfoFragment.REQUEST_IMAGE_CAPTURE;
 
 public class AddTaskActivity extends AppCompatActivity {
 
@@ -70,22 +59,6 @@ public class AddTaskActivity extends AppCompatActivity {
         }
         editor.apply();
     }
-  /*  private void restoreTasksFromSharedPreferences() {
-        SharedPreferences tasks = getSharedPreferences(TASKS_SHARED_PREFS, MODE_PRIVATE);
-        int numOfTasks = tasks.getInt(NUM_TASKS, 0);
-        if (numOfTasks != 0) {
-            TaskListContent.clearList();
-            for (int i = 0; i < numOfTasks; i++) {
-                String title = tasks.getString(TASK + i, "0");
-                String detail = tasks.getString(DETAIL + i, "0");
-                String date = tasks.getString(DATE + i, "0");
-                String picPath = tasks.getString(PIC + i, "0");
-                String id = tasks.getString(ID + i, "0");
-                TaskListContent.addItem(new TaskListContent.Task(id, title, detail, date, picPath));
-            }
-        }
-    }*/
-
     public void addTask(View view) {
         EditText taskTitleEditTxt = findViewById(R.id.taskTitle);
         EditText taskDescriptionEditTxt = findViewById(R.id.taskDescription);

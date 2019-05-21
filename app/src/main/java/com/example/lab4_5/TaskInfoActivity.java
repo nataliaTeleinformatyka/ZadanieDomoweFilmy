@@ -14,9 +14,6 @@ public class TaskInfoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_task_info);
         imgChanged = false;
     }
-  /*  public void setImgChanged(boolean val) {
-        imgChanged = val;
-    }*/
     @Override
     public void onBackPressed() {
         setResult(RESULT_OK,new Intent().putExtra(DATA_CHANGED_KEY,imgChanged));

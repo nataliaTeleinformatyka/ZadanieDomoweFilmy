@@ -1,25 +1,15 @@
 package com.example.lab4_5;
 
-import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.content.FileProvider;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.lab4_5.TaskFragment.OnListFragmentInteractionListener;
 import com.example.lab4_5.tasks.TaskListContent;
@@ -57,36 +47,28 @@ public class MyTaskRecyclerViewAdapter extends RecyclerView.Adapter<MyTaskRecycl
 
         if (picPath != null && !picPath.isEmpty()) {
             if (picPath.contains("drawable")) {
-                Drawable taskDrawable;
                 int id;
                 Resources resource = context.getResources();
                 switch (picPath) {
                     case "drawable 1":
-                        //taskDrawable = context.getResources().getDrawable(R.drawable.botoks);
                         id = R.drawable.botoks;
                         break;
                     case "drawable 2":
-                        //taskDrawable = context.getResources().getDrawable(R.drawable.kler);
                         id = R.drawable.kler;
                         break;
                     case "drawable 3":
-                        //taskDrawable = context.getResources().getDrawable(R.drawable.kochajalborzuc);
                         id = R.drawable.kochajalborzuc;
                         break;
                     case "drawable 4":
-                        //taskDrawable = context.getResources().getDrawable(R.drawable.listydom3);
                         id = R.drawable.listydom3;
                         break;
                     case "drawable 5":
-                        // taskDrawable = context.getResources().getDrawable(R.drawable.samiswoi);
                         id = R.drawable.samiswoi;
                         break;
                     case "drawable 6":
-                        //taskDrawable = context.getResources().getDrawable(R.drawable.upanabogawogrodku);
                         id = R.drawable.upanabogawogrodku;
                         break;
                     default:
-                        //taskDrawable = context.getResources().getDrawable(R.drawable.botoks);
                         id = R.drawable.upanabogawogrodku;
                 }
                 Bitmap bmp = BitmapFactory.decodeResource(resource, id);
@@ -94,13 +76,8 @@ public class MyTaskRecyclerViewAdapter extends RecyclerView.Adapter<MyTaskRecycl
                 int height = 200;
                 Bitmap resizedbitmap = Bitmap.createScaledBitmap(bmp, width, height, true);
                 holder.mItemImageView.setImageBitmap(resizedbitmap);
-                //holder.mItemImageView.setImageDrawable(taskDrawable);
-
             } else {
-
                 Bitmap cameraImage = PicUtils.decodePic(picPath, 200, 200);
-                Bitmap myBitmap = BitmapFactory.decodeFile(task.picPath);
-
                 holder.mItemImageView.setImageBitmap(cameraImage);
             }
         }
@@ -145,4 +122,3 @@ public class MyTaskRecyclerViewAdapter extends RecyclerView.Adapter<MyTaskRecycl
         }
     }
 }
-// oddanie kodu + obrona
