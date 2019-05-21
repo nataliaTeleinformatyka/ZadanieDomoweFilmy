@@ -10,6 +10,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+
 import com.example.lab4_5.tasks.TaskListContent;
 import com.example.lab4_5.tasks.TaskListContent.Task;
 /**
@@ -28,7 +30,8 @@ public class TaskFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) { super.onCreate(savedInstanceState); }
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_task_list, container, false);
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
@@ -67,6 +70,7 @@ public class TaskFragment extends Fragment {
         super.onDetach();
         mListener = null;
     }
+
     public interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
         void onListFragmentClickInteraction(Task task, int position);

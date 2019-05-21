@@ -68,7 +68,7 @@ public class TaskInfoFragment extends Fragment  {
                     taskDrawable = activity.getResources().getDrawable(R.drawable.upanabogawogrodku);
                     break;
                 case "drawable 7":
-                    taskDrawable = activity.getResources().getDrawable(R.drawable.kapitanMarvel);
+                    taskDrawable = activity.getResources().getDrawable(R.drawable.kapitanmarvel);
                     break;
                 default:
                     taskDrawable = activity.getResources().getDrawable(R.drawable.botoks);

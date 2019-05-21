@@ -69,7 +69,7 @@ public class MyTaskRecyclerViewAdapter extends RecyclerView.Adapter<MyTaskRecycl
                         id = R.drawable.upanabogawogrodku;
                         break;
                     case "drawable 7":
-                        id = R.drawable.kapitanMarvel;
+                        id = R.drawable.kapitanmarvel;
                         break;
                     default:
                         id = R.drawable.upanabogawogrodku;
